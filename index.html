@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Navštivte ZamZam Kebab. Čerstvá kuchyně a příjemná atmosféra.">
+  <meta name="template-id" content="food-restaurant">
+  <title>ZamZam Kebab — restaurace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:      #0a0804;
+      --dark:       #1a1208;
+      --gold:       #c8a96e;
+      --light-gold: #e8d5b0;
+      --cream:      #fffdf7;
+      --serif: 'Playfair Display', Georgia, serif;
+      --sans:  -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    html { overflow-x: hidden; }
+
+    body {
+      background: var(--black);
+      color: var(--cream);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.9;
+      overflow-x: hidden;
+    }
+
+    /* ── LOADER ─────────────────────────────────────────── */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: var(--dark);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.75rem;
+      transition: opacity .8s ease, visibility .8s ease;
+    }
+    #loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .loader-logo {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: var(--cream);
+      letter-spacing: .06em;
+    }
+    .loader-rule { width: 60px; height: 1px; background: var(--gold); }
+    .loader-bar-wrap {
+      width: 200px; height: 1px;
+      background: rgba(200,169,110,.15);
+      overflow: hidden;
+    }
+    .loader-bar {
+      height: 100%; width: 0%;
+      background: var(--gold);
+      transition: width .25s ease;
+    }
+    .loader-label {
+      font-size: .62rem;
+      text-transform: uppercase;
+      letter-spacing: .28em;
+      color: rgba(200,169,110,.5);
+    }
+
+    /* ── NAV ─────────────────────────────────────────────── */
+    #nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1.6rem 4rem;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background .4s, padding .4s, backdrop-filter .4s;
+    }
+    #nav.scrolled {
+      background: rgba(10,8,4,.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 1rem 4rem;
+      border-bottom: 1px solid rgba(200,169,110,.1);
+    }
+    .nav-logo {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.45rem;
+      color: var(--cream);
+      text-decoration: none;
+      letter-spacing: .04em;
+    }
+    .nav-links {
+      display: flex; align-items: center; gap: 2.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: rgba(255,253,247,.75);
+      text-decoration: none;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      transition: color .3s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-cta {
+      background: var(--gold) !important;
+      color: var(--black) !important;
+      padding: .55rem 1.4rem;
+      font-weight: 600;
+    }
+    .nav-cta:hover { background: var(--light-gold) !important; }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: .4rem;
+      z-index: 101;
+    }
+    .hamburger span {
+      display: block; width: 24px; height: 1px;
+      background: var(--cream);
+      transition: all .3s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .mob-menu {
+      position: fixed; inset: 0;
+      background: var(--black);
+      z-index: 99;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2.5rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity .4s, visibility .4s;
+    }
+    .mob-menu.open { opacity: 1; visibility: visible; }
+    .mob-menu a {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 2.4rem;
+      color: var(--cream);
+      text-decoration: none;
+      transition: color .3s;
+    }
+    .mob-menu a:hover { color: var(--gold); }
+
+    /* ── HERO ────────────────────────────────────────────── */
+    #hero {
+      position: relative;
+      height: 100vh; min-height: 600px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    #hero-video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(10,8,4,.28) 0%,
+        rgba(10,8,4,.42) 50%,
+        rgba(10,8,4,.86) 100%
+      );
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      text-align: center;
+      max-width: 820px;
+      padding: 0 2rem;
+    }
+    .hero-tag {
+      display: block;
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .32em;
+      color: var(--gold);
+      margin-bottom: 1.4rem;
+      opacity: 0;
+    }
+    .hero-title {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: clamp(2.8rem, 7vw, 5.8rem);
+      color: var(--cream);
+      line-height: 1.08;
+      margin-bottom: 1.4rem;
+      opacity: 0;
+      transform: translateY(36px);
+    }
+    .hero-rule {
+      width: 60px; height: 1px;
+      background: var(--gold);
+      margin: 0 auto 1.6rem;
+      opacity: 0;
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+    .hero-sub {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .22em;
+      color: rgba(255,253,247,.65);
+      margin-bottom: 2.8rem;
+      opacity: 0;
+    }
+    .hero-btns {
+      display: flex; gap: 1.4rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .btn {
+      display: inline-block;
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .2em;
+      text-decoration: none;
+      padding: .9rem 2.4rem;
+      transition: all .3s;
+      cursor: pointer;
+      border: none;
+      font-family: var(--sans);
+      font-weight: 500;
+    }
+    .btn-gold {
+      background: var(--gold);
+      color: var(--black);
+      font-weight: 600;
+    }
+    .btn-gold:hover { background: var(--light-gold); }
+    .btn-outline {
+      background: transparent;
+      color: var(--cream);
+      border: 1px solid rgba(255,253,247,.38);
+    }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+    .hero-vert-left {
+      position: absolute;
+      left: 2.2rem; top: 50%;
+      transform: translateY(-50%) rotate(-90deg);
+      font-size: .62rem;
+      text-transform: uppercase;
+      letter-spacing: .32em;
+      color: rgba(200,169,110,.45);
+      white-space: nowrap;
+      z-index: 2;
+      opacity: 0;
+    }
+    .hero-scroll {
+      position: absolute;
+      right: 2.2rem; bottom: 2.8rem;
+      display: flex; flex-direction: column;
+      align-items: center; gap: .8rem;
+      z-index: 2;
+      opacity: 0;
+    }
+    .hero-scroll-label {
+      font-size: .58rem;
+      text-transform: uppercase;
+      letter-spacing: .26em;
+      color: rgba(255,253,247,.45);
+      writing-mode: vertical-lr;
+      transform: rotate(180deg);
+    }
+    .hero-scroll-line {
+      width: 1px; height: 50px;
+      background: linear-gradient(to bottom, rgba(200,169,110,.6), transparent);
+      animation: lineFlow 2s ease-in-out infinite;
+    }
+    @keyframes lineFlow {
+      0%   { transform: scaleY(0); transform-origin: top; }
+      49%  { transform: scaleY(1); transform-origin: top; }
+      50%  { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+
+    /* ── SHARED SECTION ELEMENTS ─────────────────────────── */
+    .sec-num {
+      position: absolute;
+      top: 2rem; right: 3rem;
+      font-family: var(--serif);
+      font-size: clamp(5rem, 12vw, 9rem);
+      font-weight: 700;
+      color: transparent;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+    .sec-tag {
+      display: block;
+      font-size: .62rem;
+      text-transform: uppercase;
+      letter-spacing: .3em;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .sec-title {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: clamp(1.9rem, 3.5vw, 3.2rem);
+      line-height: 1.2;
+      margin-bottom: 1.4rem;
+    }
+    .gold-rule {
+      width: 60px; height: 1px;
+      background: var(--gold);
+      margin-bottom: 2rem;
+    }
+
+    /* ── SECTION 01 — O NÁS ─────────────────────────────── */
+    #about {
+      position: relative;
+      background: var(--cream);
+      color: var(--black);
+      overflow: hidden;
+    }
+    #about .sec-num { -webkit-text-stroke: 1px rgba(10,8,4,.06); }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 55% 45%;
+      min-height: 640px;
+    }
+    .about-img {
+      overflow: hidden;
+      position: relative;
+    }
+    .about-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transform: scale(1.06);
+    }
+    .about-body {
+      padding: 7rem 5rem 5rem 4.5rem;
+    }
+    .about-body .sec-title { color: var(--black); }
+    .about-text {
+      color: rgba(10,8,4,.68);
+      line-height: 2;
+      margin-bottom: 1.4rem;
+      font-size: .97rem;
+    }
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 2.5rem 0;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(10,8,4,.1);
+    }
+    .stat { text-align: center; }
+    .stat-n {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 2rem;
+      color: var(--gold);
+      display: block;
+      line-height: 1;
+      margin-bottom: .4rem;
+    }
+    .stat-l {
+      font-size: .6rem;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: rgba(10,8,4,.45);
+    }
+
+    /* ── SECTION 02 — MENU ──────────────────────────────── */
+    #menu {
+      position: relative;
+      background: var(--dark);
+      padding: 8rem 4rem;
+      overflow: hidden;
+    }
+    #menu .sec-num { -webkit-text-stroke: 1px rgba(200,169,110,.07); }
+
+    .menu-head { text-align: center; margin-bottom: 3.5rem; }
+    .menu-head .sec-title { color: var(--cream); }
+    .menu-head .gold-rule { margin: 0 auto; }
+
+    .menu-tabs {
+      display: flex; justify-content: center; gap: 3rem;
+      border-bottom: 1px solid rgba(200,169,110,.14);
+      margin-bottom: 3rem;
+    }
+    .m-tab {
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .2em;
+      color: rgba(255,253,247,.38);
+      cursor: pointer;
+      padding-bottom: 1rem;
+      margin-bottom: -1px;
+      border-bottom: 1px solid transparent;
+      transition: color .3s, border-color .3s;
+    }
+    .m-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .m-tab:hover { color: var(--light-gold); }
+
+    .m-panel { display: none; max-width: 680px; margin: 0 auto; }
+    .m-panel.active { display: block; }
+    .m-panel-desc {
+      text-align: center;
+      font-style: italic;
+      color: rgba(255,253,247,.45);
+      font-size: .85rem;
+      margin-bottom: 2rem;
+    }
+    .m-item {
+      display: flex; align-items: baseline; gap: .5rem;
+      padding: .9rem 0;
+      border-bottom: 1px solid rgba(200,169,110,.08);
+      transition: color .3s;
+    }
+    .m-item:hover { color: var(--gold); }
+    .m-name { flex: 0 0 auto; font-size: .93rem; }
+    .m-dots {
+      flex: 1;
+      border-bottom: 1px dotted rgba(200,169,110,.28);
+      margin-bottom: 4px;
+    }
+    .m-price {
+      flex: 0 0 auto;
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--gold);
+      font-size: .97rem;
+    }
+    .menu-banner {
+      max-width: 680px;
+      margin: 3.5rem auto 0;
+      text-align: center;
+      padding: 1.8rem 2rem;
+      border: 1px solid rgba(200,169,110,.18);
+      font-size: .78rem;
+      letter-spacing: .1em;
+      color: rgba(232,213,176,.65);
+    }
+
+    /* ── SECTION 03 — ATMOSFÉRA ─────────────────────────── */
+    #gallery { position: relative; overflow: hidden; }
+    .gallery-label {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--serif);
+      font-size: clamp(3.5rem, 9vw, 7rem);
+      font-weight: 700;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(200,169,110,.18);
+      letter-spacing: .22em;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .g-item {
+      position: relative;
+      height: 500px;
+      overflow: hidden;
+    }
+    .g-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .7s ease;
+    }
+    .g-item:hover img { transform: scale(1.08); }
+    .g-overlay {
+      position: absolute; inset: 0;
+      background: rgba(200,169,110,0);
+      display: flex; align-items: center; justify-content: center;
+      transition: background .4s;
+    }
+    .g-item:hover .g-overlay { background: rgba(10,8,4,.45); }
+    .g-label {
+      font-size: .62rem;
+      text-transform: uppercase;
+      letter-spacing: .3em;
+      color: var(--cream);
+      opacity: 0;
+      transition: opacity .4s;
+    }
+    .g-item:hover .g-label { opacity: 1; }
+
+    /* ── SECTION 04 — PROČ MY ───────────────────────────── */
+    #why {
+      position: relative;
+      background: var(--dark);
+      padding: 8rem 4rem 0;
+      overflow: hidden;
+    }
+    #why .sec-num { -webkit-text-stroke: 1px rgba(200,169,110,.07); }
+
+    .why-head { text-align: center; margin-bottom: 5rem; }
+    .why-head .sec-title { color: var(--cream); }
+    .why-head .gold-rule { margin: 0 auto; }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3rem;
+      max-width: 1100px;
+      margin: 0 auto 5rem;
+    }
+    .why-card { text-align: center; padding: 2rem 1.5rem; }
+    .why-num {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 3.8rem;
+      color: var(--gold);
+      opacity: .55;
+      line-height: 1;
+      margin-bottom: 1.4rem;
+    }
+    .why-card .gold-rule { margin: 0 auto 1.4rem; }
+    .why-card-title {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.35rem;
+      color: var(--cream);
+      margin-bottom: .9rem;
+    }
+    .why-card-body {
+      font-size: .83rem;
+      color: rgba(255,253,247,.48);
+      line-height: 1.8;
+    }
+
+    .marquee-wrap {
+      overflow: hidden;
+      border-top: 1px solid rgba(200,169,110,.14);
+      border-bottom: 1px solid rgba(200,169,110,.14);
+      padding: 1.4rem 0;
+    }
+    .marquee-track {
+      display: flex;
+      white-space: nowrap;
+      will-change: transform;
+    }
+    .marquee-item {
+      font-size: .62rem;
+      text-transform: uppercase;
+      letter-spacing: .3em;
+      color: rgba(200,169,110,.45);
+      padding-right: 3rem;
+      flex-shrink: 0;
+    }
+
+    /* ── SECTION 05 — REFERENCE ─────────────────────────── */
+    #testimonials {
+      position: relative;
+      background: var(--cream);
+      padding: 8rem 4rem;
+      overflow: hidden;
+    }
+    #testimonials .sec-num { -webkit-text-stroke: 1px rgba(10,8,4,.06); }
+
+    .testi-head { text-align: center; margin-bottom: 4rem; }
+    .testi-head .sec-title { color: var(--black); }
+    .testi-head .gold-rule { margin: 0 auto; }
+
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    .testi-card {
+      background: #fff;
+      padding: 3rem 2.5rem 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .testi-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .45s ease;
+    }
+    .testi-card:hover::after { transform: scaleX(1); }
+    .quote-glyph {
+      display: block;
+      font-family: var(--serif);
+      font-size: 5rem;
+      color: var(--gold);
+      line-height: .4;
+      margin-bottom: 1.6rem;
+      opacity: .55;
+    }
+    .testi-text {
+      font-style: italic;
+      color: rgba(10,8,4,.68);
+      line-height: 1.9;
+      font-size: .93rem;
+      margin-bottom: 2rem;
+    }
+    .testi-author {
+      font-size: .66rem;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: var(--black);
+      margin-bottom: .4rem;
+    }
+    .testi-stars { color: var(--gold); font-size: .78rem; letter-spacing: .08em; }
+
+    /* ── SECTION 06 — OTEVÍRACÍ DOBY ────────────────────── */
+    #hours {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 520px;
+    }
+    .hours-left {
+      background: var(--dark);
+      padding: 6rem 5rem;
+      position: relative;
+    }
+    .hours-left .sec-title { color: var(--cream); }
+    .hours-table { margin-top: 1.5rem; }
+    .h-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(200,169,110,.1);
+    }
+    .h-day {
+      font-size: .63rem;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: rgba(255,253,247,.46);
+    }
+    .h-time {
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--gold);
+      font-size: .95rem;
+    }
+    .h-note {
+      margin-top: 1.5rem;
+      font-size: .66rem;
+      color: rgba(255,253,247,.28);
+      letter-spacing: .08em;
+    }
+    .hours-right {
+      position: relative;
+      overflow: hidden;
+    }
+    .hours-right img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .hours-right-overlay {
+      position: absolute; inset: 0;
+      background: rgba(10,8,4,.66);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1.8rem; text-align: center;
+      padding: 3rem;
+    }
+    .hours-cta-title {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: clamp(1.5rem, 3vw, 2.4rem);
+      color: var(--cream);
+      line-height: 1.3;
+    }
+    .hours-cta-sub {
+      font-size: .7rem;
+      color: rgba(255,253,247,.52);
+      letter-spacing: .12em;
+    }
+
+    /* ── SECTION 07 — KONTAKT ───────────────────────────── */
+    #contact {
+      position: relative;
+      background: var(--black);
+      padding: 8rem 0;
+      overflow: hidden;
+    }
+    #contact .sec-num { -webkit-text-stroke: 1px rgba(200,169,110,.07); }
+
+    .contact-inner {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 6rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 4rem;
+    }
+    .contact-info { padding-top: 3rem; }
+    .contact-info .sec-title { color: var(--cream); }
+    .c-item {
+      display: flex; gap: 1.4rem; align-items: flex-start;
+      margin-bottom: 2rem;
+    }
+    .c-icon { color: var(--gold); font-size: 1rem; margin-top: .3rem; flex-shrink: 0; }
+    .c-label {
+      font-size: .58rem;
+      text-transform: uppercase;
+      letter-spacing: .2em;
+      color: rgba(255,253,247,.38);
+      display: block;
+      margin-bottom: .2rem;
+    }
+    .c-value {
+      font-size: .93rem;
+      color: var(--cream);
+      text-decoration: none;
+      transition: color .3s;
+    }
+    .c-value:hover { color: var(--gold); }
+
+    .form-wrap { position: relative; }
+    .form-heading {
+      display: block;
+      font-size: .62rem;
+      text-transform: uppercase;
+      letter-spacing: .3em;
+      color: var(--gold);
+      margin-bottom: 2rem;
+    }
+    .contact-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.4rem 2rem;
+    }
+    .fg { position: relative; }
+    .fg.full { grid-column: 1 / -1; }
+    .fg label {
+      font-size: .58rem;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: rgba(255,253,247,.38);
+      display: block;
+      margin-bottom: .7rem;
+    }
+    .fg input,
+    .fg select,
+    .fg textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(200,169,110,.28);
+      color: var(--cream);
+      font-size: .9rem;
+      font-family: var(--sans);
+      padding: .45rem 0;
+      outline: none;
+      transition: border-color .3s;
+    }
+    .fg input:focus,
+    .fg select:focus,
+    .fg textarea:focus { border-bottom-color: var(--gold); }
+    .fg textarea { resize: none; height: 78px; }
+    .fg select { appearance: none; cursor: pointer; }
+    .fg select option { background: var(--dark); color: var(--cream); }
+    .fg input::placeholder,
+    .fg textarea::placeholder { color: rgba(255,253,247,.22); }
+    .form-submit { grid-column: 1 / -1; margin-top: .8rem; }
+    .form-submit .btn { width: 100%; text-align: center; }
+
+    /* ── FOOTER ─────────────────────────────────────────── */
+    footer {
+      background: var(--black);
+      border-top: 1px solid rgba(200,169,110,.1);
+      padding: 2.6rem 4rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .foot-logo {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.25rem;
+      color: var(--cream);
+    }
+    .foot-copy {
+      font-size: .66rem;
+      color: rgba(255,253,247,.28);
+      letter-spacing: .08em;
+    }
+    .foot-links { display: flex; gap: 2rem; }
+    .foot-links a {
+      font-size: .62rem;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: rgba(255,253,247,.28);
+      text-decoration: none;
+      transition: color .3s;
+    }
+    .foot-links a:hover { color: var(--gold); }
+
+    /* ── RESPONSIVE ─────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .testi-grid { grid-template-columns: 1fr 1fr; }
+      .testi-grid .testi-card:last-child { grid-column: 1 / -1; max-width: 500px; margin: 0 auto; width: 100%; }
+    }
+    @media (max-width: 960px) {
+      #nav { padding: 1.4rem 2rem; }
+      #nav.scrolled { padding: 1rem 2rem; }
+      .about-grid { grid-template-columns: 1fr; }
+      .about-img { height: 420px; }
+      .about-body { padding: 3.5rem 2.5rem; }
+      .why-grid { grid-template-columns: 1fr 1fr; }
+      #hours { grid-template-columns: 1fr; }
+      .hours-right { height: 420px; }
+      .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .hero-vert-left { display: none; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .g-item { height: 300px; }
+      .why-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+      .testi-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+      .testi-grid .testi-card:last-child { grid-column: auto; max-width: none; }
+      #menu { padding: 6rem 1.5rem; }
+      #testimonials,
+      #why { padding: 6rem 1.5rem; }
+      #contact { padding: 5rem 0; }
+      .contact-inner { padding: 0 1.5rem; gap: 2.5rem; }
+      .contact-form { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 1.4rem; text-align: center; }
+      .foot-links { flex-wrap: wrap; justify-content: center; }
+      .sec-num { right: 1rem; font-size: 4.5rem; }
+      .hours-left { padding: 4rem 2rem; }
+    }
+    @media (max-width: 480px) {
+      .about-stats { grid-template-columns: repeat(3,1fr); gap: .6rem; }
+      .stat-n { font-size: 1.5rem; }
+      .menu-tabs { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOADER ════════════════════════════════════════════ -->
+<div id="loader">
+  <div class="loader-logo">ZamZam Kebab</div>
+  <div class="loader-rule"></div>
+  <div class="loader-bar-wrap">
+    <div class="loader-bar" id="loaderBar"></div>
+  </div>
+  <div class="loader-label">Připravujeme váš návrh webu…</div>
+</div>
+
+<!-- ══ NAVIGATION ════════════════════════════════════════ -->
+<nav id="nav">
+  <a href="#" class="nav-logo">ZamZam Kebab</a>
+  <ul class="nav-links">
+    <li><a href="#about">O nás</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#gallery">Galerie</a></li>
+    <li><a href="#contact">Kontakt</a></li>
+    <li><a href="#contact" class="nav-cta">Rezervovat</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="mob-menu" id="mobMenu">
+  <a href="#about"   class="mob-link">O nás</a>
+  <a href="#menu"    class="mob-link">Menu</a>
+  <a href="#gallery" class="mob-link">Galerie</a>
+  <a href="#contact" class="mob-link">Kontakt</a>
+  <a href="#contact" class="mob-link" style="color:var(--gold)">Rezervovat</a>
+</div>
+
+<!-- ══ HERO ══════════════════════════════════════════════ -->
+<section id="hero">
+  <video id="hero-video" muted playsinline preload="auto">
+    <source src="https://raw.githubusercontent.com/rafaelbsqwer/webhunter-assets/main/food-restaurant/video.mp4" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
+
+  <span class="hero-vert-left">ZamZam Kebab</span>
+
+  <div class="hero-content">
+    <span class="hero-tag">— Restaurace &amp; Fine Dining —</span>
+    <h1 class="hero-title">Kde se vaří s láskou každý den</h1>
+    <div class="hero-rule"></div>
+    <p class="hero-sub">Čerstvé suroviny a domácí recepty v příjemné atmosféře</p>
+    <div class="hero-btns">
+      <a href="#contact" class="btn btn-gold">Rezervovat stůl</a>
+      <a href="#menu"    class="btn btn-outline">Prohlédnout menu</a>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <span class="hero-scroll-label">Scroll to Explore</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- ══ 01 — O NÁS ════════════════════════════════════════ -->
+<section id="about">
+  <span class="sec-num">01</span>
+  <div class="about-grid">
+    <div class="about-img">
+      <img src="https://raw.githubusercontent.com/rafaelbsqwer/webhunter-assets/main/food-restaurant/foto1.jpeg"
+           alt="Restaurace ZamZam Kebab">
+    </div>
+    <div class="about-body">
+      <span class="sec-tag">— Náš příběh —</span>
+      <h2 class="sec-title">O restauraci<br>ZamZam Kebab</h2>
+      <div class="gold-rule"></div>
+      <p class="about-text">ZamZam Kebab je oblíbeným místem pro setkání a dobré jídlo. Nabízíme tradiční českou kuchyni připravenou z čerstvých surovin s důrazem na kvalitu a domácí chuť. Přijďte si k nám odpočinout a vychutnat si příjemnou atmosféru.</p>
+      <div class="about-stats">
+        <div class="stat">
+          <span class="stat-n">25+</span>
+          <span class="stat-l">let tradice</span>
+        </div>
+        <div class="stat">
+          <span class="stat-n">50+</span>
+          <span class="stat-l">míst k sezení</span>
+        </div>
+        <div class="stat">
+          <span class="stat-n">100%</span>
+          <span class="stat-l">čerstvé suroviny</span>
+        </div>
+      </div>
+      <a href="#contact" class="btn btn-gold">Rezervovat stůl</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 02 — MENU ══════════════════════════════════════════ -->
+<section id="menu">
+  <span class="sec-num">02</span>
+  <div class="menu-head">
+    <span class="sec-tag">— Naše nabídka —</span>
+    <h2 class="sec-title">Kulinářský zážitek</h2>
+    <div class="gold-rule"></div>
+  </div>
+
+  <div class="menu-tabs">
+    <div class="m-tab active" data-tab="0">Polévky a předkrmy</div>
+    <div class="m-tab"        data-tab="1">Hlavní jídla</div>
+    <div class="m-tab"        data-tab="2">Dezerty a nápoje</div>
+  </div>
+
+  <div class="m-panel active" id="mp0">
+    <p class="m-panel-desc">Domácí polévky a sezónní předkrmy připravované každý den čerstvě.</p>
+    <div class="m-item"><span class="m-name">Tataráček z hovězí svíčkové</span><span class="m-dots"></span><span class="m-price">285 Kč</span></div>
+    <div class="m-item"><span class="m-name">Carpaccio z čerstvého lososa</span><span class="m-dots"></span><span class="m-price">265 Kč</span></div>
+    <div class="m-item"><span class="m-name">Foie gras s brioškou a trufflem</span><span class="m-dots"></span><span class="m-price">395 Kč</span></div>
+    <div class="m-item"><span class="m-name">Krémová dýňová polévka</span><span class="m-dots"></span><span class="m-price">175 Kč</span></div>
+    <div class="m-item"><span class="m-name">Lanýžová bruschetta</span><span class="m-dots"></span><span class="m-price">225 Kč</span></div>
+  </div>
+
+  <div class="m-panel" id="mp1">
+    <p class="m-panel-desc">Tradiční česká jídla i moderní kulinářské speciality od našeho šéfkuchaře.</p>
+    <div class="m-item"><span class="m-name">Svíčková na smetaně</span><span class="m-dots"></span><span class="m-price">485 Kč</span></div>
+    <div class="m-item"><span class="m-name">Pečená kachna s červeným zelím</span><span class="m-dots"></span><span class="m-price">545 Kč</span></div>
+    <div class="m-item"><span class="m-name">Jehněčí rack s bylinkovým pestem</span><span class="m-dots"></span><span class="m-price">695 Kč</span></div>
+    <div class="m-item"><span class="m-name">Grilovaný halibut, kaparový beurre blanc</span><span class="m-dots"></span><span class="m-price">585 Kč</span></div>
+    <div class="m-item"><span class="m-name">Risotto s hříbky a lanýžovým olejem</span><span class="m-dots"></span><span class="m-price">445 Kč</span></div>
+  </div>
+
+  <div class="m-panel" id="mp2">
+    <p class="m-panel-desc">Domácí dezerty a pečlivě vybraná vína doplní Váš gastronomický zážitek.</p>
+    <div class="m-item"><span class="m-name">Čokoládová fondant, vanilkové zmrzlina</span><span class="m-dots"></span><span class="m-price">185 Kč</span></div>
+    <div class="m-item"><span class="m-name">Crème brûlée s bourbon vanilkou</span><span class="m-dots"></span><span class="m-price">155 Kč</span></div>
+    <div class="m-item"><span class="m-name">Tiramisu della casa</span><span class="m-dots"></span><span class="m-price">165 Kč</span></div>
+    <div class="m-item"><span class="m-name">Výběr zrajících sýrů, med, ořechy</span><span class="m-dots"></span><span class="m-price">295 Kč</span></div>
+    <div class="m-item"><span class="m-name">Sorbety ze sezónního ovoce</span><span class="m-dots"></span><span class="m-price">125 Kč</span></div>
+  </div>
+
+  <div class="menu-banner">
+    Máme také degustační menu — zeptejte se obsluhy
+  </div>
+</section>
+
+<!-- ══ 03 — ATMOSFÉRA (fullbleed) ═════════════════════════ -->
+<section id="gallery">
+  <div class="gallery-label">ATMOSFÉRA</div>
+  <div class="gallery-grid">
+    <div class="g-item">
+      <img src="https://raw.githubusercontent.com/rafaelbsqwer/webhunter-assets/main/food-restaurant/foto1.jpeg" alt="Interiér">
+      <div class="g-overlay"><span class="g-label">Interiér</span></div>
+    </div>
+    <div class="g-item">
+      <img src="https://raw.githubusercontent.com/rafaelbsqwer/webhunter-assets/main/food-restaurant/foto2.jpeg" alt="Kuchyně">
+      <div class="g-overlay"><span class="g-label">Kuchyně</span></div>
+    </div>
+    <div class="g-item">
+      <img src="https://raw.githubusercontent.com/rafaelbsqwer/webhunter-assets/main/food-restaurant/foto3.jpeg" alt="Atmosféra">
+      <div class="g-overlay"><span class="g-label">Atmosféra</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 04 — PROČ MY ══════════════════════════════════════ -->
+<section id="why">
+  <span class="sec-num">04</span>
+  <div class="why-head">
+    <span class="sec-tag">— Naše hodnoty —</span>
+    <h2 class="sec-title">Proč si vybrat<br>právě nás</h2>
+    <div class="gold-rule"></div>
+  </div>
+
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-num">01</div>
+      <div class="gold-rule"></div>
+      <h3 class="why-card-title">Čerstvé suroviny denně</h3>
+      <p class="why-card-body">Pečlivě vybraní lokální dodavatelé zaručují nejvyšší kvalitu každého pokrmu.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-num">02</div>
+      <div class="gold-rule"></div>
+      <h3 class="why-card-title">Domácí receptury</h3>
+      <p class="why-card-body">Tři generace kulinářského umění a vášně pro perfektní gastronomický zážitek.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-num">03</div>
+      <div class="gold-rule"></div>
+      <h3 class="why-card-title">Přátelská obsluha</h3>
+      <p class="why-card-body">Každý host je pro nás jedinečný — přizpůsobíme se vašim preferencím a přáním.</p>
+    </div>
+  </div>
+
+  <div class="marquee-wrap">
+    <div class="marquee-track" id="marqueeTrack">
+      <span class="marquee-item">ČERSTVÉ SUROVINY · RODINNÁ TRADICE · OSOBNÍ PŘÍSTUP · FINE DINING · ČESKÁ KUCHYNĚ · </span>
+      <span class="marquee-item">ČERSTVÉ SUROVINY · RODINNÁ TRADICE · OSOBNÍ PŘÍSTUP · FINE DINING · ČESKÁ KUCHYNĚ · </span>
+      <span class="marquee-item">ČERSTVÉ SUROVINY · RODINNÁ TRADICE · OSOBNÍ PŘÍSTUP · FINE DINING · ČESKÁ KUCHYNĚ · </span>
+      <span class="marquee-item">ČERSTVÉ SUROVINY · RODINNÁ TRADICE · OSOBNÍ PŘÍSTUP · FINE DINING · ČESKÁ KUCHYNĚ · </span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 05 — REFERENCE ════════════════════════════════════ -->
+<section id="testimonials">
+  <span class="sec-num">05</span>
+  <div class="testi-head">
+    <span class="sec-tag">— Co říkají hosté —</span>
+    <h2 class="sec-title">Reference<br>našich hostů</h2>
+    <div class="gold-rule"></div>
+  </div>
+
+  <div class="testi-grid">
+    <div class="testi-card">
+      <span class="quote-glyph">"</span>
+      <p class="testi-text">Skvělé jídlo a příjemná obsluha. Vracíme se pravidelně!</p>
+      <div class="testi-author">— Martin K.</div>
+      <div class="testi-stars">★★★★★</div>
+    </div>
+    <div class="testi-card">
+      <span class="quote-glyph">"</span>
+      <p class="testi-text">Nejlepší restaurace v okolí. Doporučuji každému.</p>
+      <div class="testi-author">— Jana N.</div>
+      <div class="testi-stars">★★★★★</div>
+    </div>
+    <div class="testi-card">
+      <span class="quote-glyph">"</span>
+      <p class="testi-text">Nezapomenutelný zážitek od prvního sousta až po dezert. Degustační menu bylo absolutní mistrovské dílo. Vrátíme se určitě brzy.</p>
+      <div class="testi-author">Jiří &amp; Petra Novotní</div>
+      <div class="testi-stars">★★★★★</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 06 — OTEVÍRACÍ DOBY ═══════════════════════════════ -->
+<section id="hours">
+  <div class="hours-left">
+    <span class="sec-tag">— Kdy nás navštívit —</span>
+    <h2 class="sec-title">Otevírací doby</h2>
+    <div class="gold-rule"></div>
+    <div class="hours-table">
+      <div class="h-row"><span class="h-day">Pondělí – Čtvrtek</span><span class="h-time">11:30 – 22:00</span></div>
+      <div class="h-row"><span class="h-day">Pátek – Sobota</span>   <span class="h-time">11:30 – 23:30</span></div>
+      <div class="h-row"><span class="h-day">Neděle</span>           <span class="h-time">12:00 – 21:00</span></div>
+    </div>
+    <p class="h-note">* Kuchyně zavírá 30 min. před zavírací dobou</p>
+  </div>
+  <div class="hours-right">
+    <img src="https://raw.githubusercontent.com/rafaelbsqwer/webhunter-assets/main/food-restaurant/foto2.jpeg" alt="Rezervace">
+    <div class="hours-right-overlay">
+      <div class="gold-rule" style="margin:0 auto"></div>
+      <h3 class="hours-cta-title">Zarezervujte si<br>váš stůl</h3>
+      <p class="hours-cta-sub">Těšíme se na vaši návštěvu</p>
+      <a href="#contact" class="btn btn-gold">Rezervovat online</a>
+      <div class="gold-rule" style="margin:0 auto"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 07 — KONTAKT ══════════════════════════════════════ -->
+<section id="contact">
+  <span class="sec-num">07</span>
+  <div class="contact-inner">
+    <div class="contact-info">
+      <span class="sec-tag">— Najdete nás —</span>
+      <h2 class="sec-title">Kontakt<br>&amp; Rezervace</h2>
+      <div class="gold-rule"></div>
+
+      <div class="c-item">
+        <div class="c-icon">◆</div>
+        <div>
+          <span class="c-label">Adresa</span>
+          <span class="c-value"></span>
+        </div>
+      </div>
+      <div class="c-item">
+        <div class="c-icon">◆</div>
+        <div>
+          <span class="c-label">Telefon</span>
+          <a href="tel:606 500 681" class="c-value">606 500 681</a>
+        </div>
+      </div>
+      <div class="c-item">
+        <div class="c-icon">◆</div>
+        <div>
+          <span class="c-label">Email</span>
+          <a href="mailto:info@zamzamkebab.cz" class="c-value">info@zamzamkebab.cz</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-wrap">
+      <span class="form-heading">Rezervace &amp; Dotazy</span>
+      <form class="contact-form" id="contactForm" novalidate>
+        <div class="fg">
+          <label>Jméno a příjmení</label>
+          <input type="text" placeholder="Jan Novák" required>
+        </div>
+        <div class="fg">
+          <label>Email</label>
+          <input type="email" placeholder="vas@email.cz" required>
+        </div>
+        <div class="fg">
+          <label>Telefon</label>
+          <input type="tel" placeholder="+420 xxx xxx xxx">
+        </div>
+        <div class="fg">
+          <label>Datum rezervace</label>
+          <input type="date" required>
+        </div>
+        <div class="fg full">
+          <label>Počet osob</label>
+          <select>
+            <option value="">— Vyberte počet hostů —</option>
+            <option>1 osoba</option>
+            <option>2 osoby</option>
+            <option>3 osoby</option>
+            <option>4 osoby</option>
+            <option>5 osob</option>
+            <option>6 osob</option>
+            <option>7 a více osob</option>
+          </select>
+        </div>
+        <div class="fg full">
+          <label>Poznámka</label>
+          <textarea placeholder="Alergie, speciální přání, příležitost…"></textarea>
+        </div>
+        <div class="form-submit">
+          <button type="submit" class="btn btn-gold" id="formBtn">Odeslat rezervaci</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ════════════════════════════════════════════ -->
+<footer>
+  <span class="foot-logo">ZamZam Kebab</span>
+  <span class="foot-copy">© 2024 ZamZam Kebab. Všechna práva vyhrazena.</span>
+  <div class="foot-links">
+    <a href="#">Ochrana soukromí</a>
+    <a href="#">Podmínky užití</a>
+  </div>
+</footer>
+
+<!-- ══ SCRIPTS ════════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ── LOADER ──────────────────────────────────────────── */
+  var loader    = document.getElementById('loader');
+  var loaderBar = document.getElementById('loaderBar');
+  var video     = document.getElementById('hero-video');
+  var loaderDone = false;
+
+  var pct = 0;
+  var tick = setInterval(function () {
+    pct += Math.random() * 14 + 4;
+    if (pct >= 82) { clearInterval(tick); pct = 82; }
+    loaderBar.style.width = pct + '%';
+  }, 220);
+
+  function hideLoader() {
+    if (loaderDone) return;
+    loaderDone = true;
+    clearInterval(tick);
+    loaderBar.style.transition = 'width .4s ease';
+    loaderBar.style.width = '100%';
+    setTimeout(function () {
+      loader.classList.add('hidden');
+      runHeroEntrance();
+    }, 500);
+  }
+
+  video.addEventListener('canplaythrough', hideLoader);
+  video.addEventListener('loadeddata',     hideLoader);
+  setTimeout(hideLoader, 4500);
+
+  /* ── LENIS SMOOTH SCROLL ─────────────────────────────── */
+  var lenis = new Lenis({
+    duration: 1.2,
+    easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+    orientation: 'vertical',
+    smoothWheel: true,
+  });
+
+  gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+  gsap.ticker.lagSmoothing(0);
+  lenis.on('scroll', ScrollTrigger.update);
+
+  /* ── NAV SCROLL STATE ────────────────────────────────── */
+  var nav = document.getElementById('nav');
+  lenis.on('scroll', function (e) {
+    nav.classList.toggle('scrolled', e.scroll > 80);
+  });
+
+  /* ── HAMBURGER ───────────────────────────────────────── */
+  var hamburger = document.getElementById('hamburger');
+  var mobMenu   = document.getElementById('mobMenu');
+
+  hamburger.addEventListener('click', function () {
+    var open = hamburger.classList.toggle('open');
+    mobMenu.classList.toggle('open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  });
+
+  document.querySelectorAll('.mob-link').forEach(function (a) {
+    a.addEventListener('click', function () {
+      hamburger.classList.remove('open');
+      mobMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  /* ── SMOOTH ANCHOR SCROLL ────────────────────────────── */
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var id = a.getAttribute('href');
+      if (id === '#') return;
+      var target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      lenis.scrollTo(target, { offset: -80, duration: 1.5 });
+    });
+  });
+
+  /* ── SCROLL-DRIVEN VIDEO ─────────────────────────────── */
+  var isMobile = window.innerWidth < 768;
+
+  if (isMobile) {
+    video.loop = true;
+  } else {
+    video.loop = false;
+    video.pause();
+    video.currentTime = 0;
+
+    var heroEl = document.getElementById('hero');
+    lenis.on('scroll', function (e) {
+      if (video.readyState < 2 || !video.duration) return;
+      var pct = Math.min(Math.max(e.scroll / heroEl.offsetHeight, 0), 1);
+      video.currentTime = pct * video.duration * 0.82;
+    });
+  }
+
+  /* ── HERO ENTRANCE ───────────────────────────────────── */
+  function runHeroEntrance() {
+    if (isMobile) {
+      video.play().catch(function () {});
+    }
+
+    var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    tl
+      .to('.hero-tag',       { opacity: 1, y: 0,     duration: .75 }, .15)
+      .to('.hero-title',     { opacity: 1, y: 0,     duration: 1   }, .35)
+      .to('.hero-rule',      { opacity: 1, scaleX: 1, duration: .8,
+                               transformOrigin: 'left center'       }, .6)
+      .to('.hero-sub',       { opacity: 1, y: 0,     duration: .75 }, .75)
+      .to('.hero-btns',      { opacity: 1, y: 0,     duration: .75 }, .9)
+      .to('.hero-vert-left', { opacity: 1, x: 0,     duration: 1   }, .45)
+      .to('.hero-scroll',    { opacity: 1, y: 0,     duration: .75 }, 1.1);
+
+    gsap.set('.hero-title, .hero-btns', { y: 36 });
+    gsap.set('.hero-scroll',            { y: 20 });
+    tl.restart();
+
+    initScrollAnimations();
+    initMarquee();
+  }
+
+  /* ── SCROLL ANIMATIONS ───────────────────────────────── */
+  function fromTo(el, from, to) {
+    gsap.fromTo(el, from, Object.assign({ ease: 'power3.out' }, to, {
+      scrollTrigger: { trigger: el, start: 'top 84%', toggleActions: 'play none none none' }
+    }));
+  }
+
+  function initScrollAnimations() {
+
+    /* section numbers slide in from left */
+    gsap.utils.toArray('.sec-num').forEach(function (el) {
+      gsap.fromTo(el,
+        { opacity: 0, x: -55 },
+        { opacity: 1, x: 0, duration: 1.2, ease: 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' } }
+      );
+    });
+
+    /* sec-tag fade */
+    gsap.utils.toArray('.sec-tag').forEach(function (el) {
+      gsap.fromTo(el,
+        { opacity: 0 },
+        { opacity: 1, duration: .8, ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 86%', toggleActions: 'play none none none' } }
+      );
+    });
+
+    /* gold rules grow */
+    gsap.utils.toArray('.gold-rule').forEach(function (el) {
+      if (el.closest('#hero')) return;
+      gsap.fromTo(el,
+        { scaleX: 0, transformOrigin: 'left center' },
+        { scaleX: 1, duration: .8, ease: 'power2.inOut',
+          scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' } }
+      );
+    });
+
+    /* sec-title reveal */
+    gsap.utils.toArray('.sec-title').forEach(function (el) {
+      gsap.fromTo(el,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' } }
+      );
+    });
+
+    /* about image scale */
+    gsap.fromTo('.about-img img',
+      { scale: 1.09 },
+      { scale: 1, duration: 1.6, ease: 'power2.out',
+        scrollTrigger: { trigger: '.about-img', start: 'top 80%', toggleActions: 'play none none none' } }
+    );
+
+    /* about body children stagger */
+    gsap.utils.toArray('.about-body > *').forEach(function (el, i) {
+      gsap.fromTo(el,
+        { opacity: 0, x: 35 },
+        { opacity: 1, x: 0, duration: .9, ease: 'power3.out', delay: i * .1,
+          scrollTrigger: { trigger: '.about-body', start: 'top 80%', toggleActions: 'play none none none' } }
+      );
+    });
+
+    /* menu items */
+    gsap.utils.toArray('.m-item').forEach(function (el, i) {
+      gsap.fromTo(el,
+        { opacity: 0, x: -16 },
+        { opacity: 1, x: 0, duration: .55, ease: 'power2.out', delay: i * .04,
+          scrollTrigger: { trigger: el, start: 'top 92%', toggleActions: 'play none none none' } }
+      );
+    });
+
+    /* gallery images scrub */
+    gsap.utils.toArray('.g-item img').forEach(function (img) {
+      gsap.fromTo(img,
+        { scale: 1.12 },
+        { scale: 1, ease: 'none',
+          scrollTrigger: { trigger: img, start: 'top bottom', end: 'bottom top', scrub: 1.8 } }
+      );
+    });
+
+    /* why cards stagger */
+    gsap.utils.toArray('.why-card').forEach(function (c, i) {
+      gsap.fromTo(c,
+        { opacity: 0, y: 55 },
+        { opacity: 1, y: 0, duration: .95, ease: 'power3.out', delay: i * .18,
+          scrollTrigger: { trigger: '.why-grid', start: 'top 78%', toggleActions: 'play none none none' } }
+      );
+    });
+
+    /* testimonial cards stagger */
+    gsap.utils.toArray('.testi-card').forEach(function (c, i) {
+      gsap.fromTo(c,
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: .9, ease: 'power3.out', delay: i * .15,
+          scrollTrigger: { trigger: '.testi-grid', start: 'top 78%', toggleActions: 'play none none none' } }
+      );
+    });
+
+    /* hours rows stagger */
+    gsap.utils.toArray('.h-row').forEach(function (r, i) {
+      gsap.fromTo(r,
+        { opacity: 0, x: -25 },
+        { opacity: 1, x: 0, duration: .7, ease: 'power2.out', delay: i * .12,
+          scrollTrigger: { trigger: '.hours-table', start: 'top 80%', toggleActions: 'play none none none' } }
+      );
+    });
+
+    /* contact items stagger */
+    gsap.utils.toArray('.c-item').forEach(function (c, i) {
+      gsap.fromTo(c,
+        { opacity: 0, x: -28 },
+        { opacity: 1, x: 0, duration: .8, ease: 'power3.out', delay: i * .15,
+          scrollTrigger: { trigger: '.contact-info', start: 'top 78%', toggleActions: 'play none none none' } }
+      );
+    });
+
+    /* form fields stagger */
+    gsap.utils.toArray('.contact-form .fg, .contact-form .form-submit').forEach(function (el, i) {
+      gsap.fromTo(el,
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: .6, ease: 'power2.out', delay: i * .07,
+          scrollTrigger: { trigger: '.contact-form', start: 'top 80%', toggleActions: 'play none none none' } }
+      );
+    });
+
+    /* menu banner + header elements */
+    gsap.utils.toArray('.menu-banner, .menu-head > *, .testi-head > *, .why-head > *').forEach(function (el) {
+      gsap.fromTo(el,
+        { opacity: 0, y: 22 },
+        { opacity: 1, y: 0, duration: .8, ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 87%', toggleActions: 'play none none none' } }
+      );
+    });
+  }
+
+  /* ── MARQUEE ─────────────────────────────────────────── */
+  function initMarquee() {
+    var track = document.getElementById('marqueeTrack');
+    if (!track) return;
+
+    track.innerHTML += track.innerHTML;
+
+    var halfW = track.scrollWidth / 2;
+
+    gsap.to(track, {
+      x: -halfW,
+      duration: 32,
+      ease: 'none',
+      repeat: -1,
+    });
+  }
+
+  /* ── MENU TABS ───────────────────────────────────────── */
+  document.querySelectorAll('.m-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.m-tab').forEach(function (t) { t.classList.remove('active'); });
+      document.querySelectorAll('.m-panel').forEach(function (p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      document.getElementById('mp' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ── FORM SUBMIT ─────────────────────────────────────── */
+  var contactForm = document.getElementById('contactForm');
+  var formBtn     = document.getElementById('formBtn');
+
+  contactForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    formBtn.textContent = 'Odesíláno…';
+    formBtn.style.opacity = '.65';
+    formBtn.disabled = true;
+    setTimeout(function () {
+      formBtn.textContent = 'Rezervace odeslána ✓';
+      formBtn.style.opacity = '1';
+      formBtn.style.background = '#3a6b32';
+      formBtn.style.color = '#fff';
+    }, 1300);
+  });
+
+}());
+</script>
+
+<!-- ══ TRACKING ══════════════════════════════════════════ -->
+<script>fetch('http://localhost:3000/t/visit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({siteId:'wh-zamzam-kebab-1781807819752'})}).catch(function(){})</script>
+</body>
+</html>
